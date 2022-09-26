@@ -40,6 +40,7 @@ class PlayerFragment : Fragment(R.layout.fragment_player) {
         initMotionLayoutEvent(fragmentPlayerBinding)
         initRecyclerView(fragmentPlayerBinding)
         initPlayer(fragmentPlayerBinding)
+        initControlButton(fragmentPlayerBinding)
 
         getVideoList()
 
@@ -71,6 +72,34 @@ class PlayerFragment : Fragment(R.layout.fragment_player) {
         }
 
         fragmentPlayerBinding.playerView.player = player
+
+        binding?.let {
+            player?.addListener(object : Player.EventListener {
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+
+                    if(isPlaying) {
+                        it.bottomPlayerControlButton.setImageResource(R.drawable.ic_baseline_pause_24)
+                    } else {
+                        it.bottomPlayerControlButton.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+                    }
+                }
+            })
+        }
+
+    }
+
+    private fun initControlButton(fragmentPlayerBinding: FragmentPlayerBinding) {
+        fragmentPlayerBinding.bottomPlayerControlButton.setOnClickListener {
+            val player = this.player ?: return@setOnClickListener
+
+            if (player.isPlaying) {
+                player.pause()
+            } else {
+                player.play()
+            }
+        }
     }
 
     private fun initRecyclerView(fragmentPlayerBinding : FragmentPlayerBinding) {
@@ -135,6 +164,12 @@ class PlayerFragment : Fragment(R.layout.fragment_player) {
     override fun onDestroy() {
         super.onDestroy()
         binding = null
+        player?.release()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        player?.pause()
     }
 }
 
